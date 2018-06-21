@@ -1,0 +1,9 @@
+package com.netease.next.jraknet.binary;
+
+public class Magic {
+
+	public static final byte[] VALUE = new byte[]{(byte)0x00, (byte)0xff, (byte)0xff, 
+			(byte)0x00, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfe, (byte)0xfd, 
+			(byte)0xfd, (byte)0xfd, (byte)0xfd, (byte)0x12, (byte)0x34, (byte)0x56, (byte)0x78};
+	
+}
