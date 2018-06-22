@@ -16,9 +16,9 @@ public class Sender implements FrameSetIndexGenerator {
 	private int mtu;
 	private int maxFrameBodySize; // mtu - 60. 
 	
-	private AtomicInteger reliableFrameIndex = new AtomicInteger(0); // 24 bits.
+	private Unsigned24BitsCycleIndexGenerator reliableFrameIndex = new Unsigned24BitsCycleIndexGenerator(0);
 	private AtomicInteger compoundID = new AtomicInteger(0); // 16 bits
-	private AtomicInteger frameSetIndex = new AtomicInteger(0);
+	private Unsigned24BitsCycleIndexGenerator frameSetIndex = new Unsigned24BitsCycleIndexGenerator(0);
 	
 	private PriorityBlockingQueue<Frame> frameQueue = new PriorityBlockingQueue<>();
 	
@@ -44,7 +44,7 @@ public class Sender implements FrameSetIndexGenerator {
 				frame.setSendTime(sendTime);
 				frame.setReliabilityType(ReliabilityType.reliable);
 				frame.setFragmented(true);
-				frame.setReliableFrameIndex(reliableFrameIndex.getAndIncrement() % 0xFFFFFF);
+				frame.setReliableFrameIndex(reliableFrameIndex.getAndIncrement());
 				frame.setCompoundSize(compoundSize);
 				frame.setCompoundID(compound);
 				frame.setFragmentIndex(fragmentIndex++);
@@ -57,7 +57,7 @@ public class Sender implements FrameSetIndexGenerator {
 			frame.setSendTime(sendTime);
 			frame.setReliabilityType(ReliabilityType.reliable);
 			frame.setFragmented(false);
-			frame.setReliableFrameIndex(reliableFrameIndex.getAndIncrement() % 0xFFFFFF);
+			frame.setReliableFrameIndex(reliableFrameIndex.getAndIncrement());
 			enqueue(frame);
 		}
 	}

@@ -23,7 +23,7 @@ public class SenderTest {
 	@Test
 	public void testPackAndSend_messageLengthLessThanFragmentBodyMaxSize() throws Exception {
 		sender.setMtu(1464);
-		byte[] message = ProtocolUtils.ramdomByteArray(500);
+		byte[] message = ProtocolTestUtils.ramdomByteArray(500);
 		
 		sender.packAndSend(message);
 		PriorityBlockingQueue<Frame> frameQueue = sender.getFrameQueue();
@@ -37,7 +37,7 @@ public class SenderTest {
 		int mtu = 1464;
 		int maxFragmentSize = 1464 - 60;
 		sender.setMtu(mtu);
-		byte[] message = ProtocolUtils.ramdomByteArray(1555);
+		byte[] message = ProtocolTestUtils.ramdomByteArray(1555);
 		
 		sender.packAndSend(message);
 		PriorityBlockingQueue<Frame> frameQueue = sender.getFrameQueue();
@@ -59,4 +59,5 @@ public class SenderTest {
 		assertThat(secondFrame.getCompoundID(), is(0));
 		assertThat(secondFrame.getFragmentIndex(), is(1));
 	}
+	
 }
