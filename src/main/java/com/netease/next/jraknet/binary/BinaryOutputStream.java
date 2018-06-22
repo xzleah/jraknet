@@ -65,9 +65,12 @@ public class BinaryOutputStream {
         });
 	}
 
-	public void putUint24Le(int frameSetIndex) {
-		// TODO Auto-generated method stub
-		
+	public void putUint24Le(int value) {
+		putByteArray(new byte[]{
+	                (byte) (value & 0xFF),
+	                (byte) ((value >>> 8) & 0xFF),
+	                (byte) ((value >>> 16) & 0xFF)
+	        });
 	}
 
 }
