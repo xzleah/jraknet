@@ -2,7 +2,7 @@ package com.netease.next.jraknet.protocol;
 
 import java.util.Random;
 
-public class ProtocolUtils {
+public class ProtocolTestUtils {
 
 	public static byte[] ramdomByteArray(int length) {
 		Random random = new Random();

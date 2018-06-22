@@ -100,11 +100,11 @@ public class FrameSetPacketPackerTest {
 	@Test
 	public void testNext_OK_with2FramesSendedInTimeWhichBeInsidedAQueue() {
 		long sendTime = System.currentTimeMillis();
-		Frame frame1 = new Frame(ProtocolUtils.ramdomByteArray(200));
+		Frame frame1 = new Frame(ProtocolTestUtils.ramdomByteArray(200));
 		frame1.setSendTime(sendTime - 1);
 		frame1.setReliabilityType(ReliabilityType.reliable);
 		
-		Frame frame2 = new Frame(ProtocolUtils.ramdomByteArray(MTU - 1 - 3 - frame1.lengthOfBytes() - 1 - 2 - 3));
+		Frame frame2 = new Frame(ProtocolTestUtils.ramdomByteArray(MTU - 1 - 3 - frame1.lengthOfBytes() - 1 - 2 - 3));
 		frame2.setSendTime(sendTime);
 		frame2.setReliabilityType(ReliabilityType.reliable);
 		
@@ -128,15 +128,15 @@ public class FrameSetPacketPackerTest {
 	@Test
 	public void testNext_OK_returnNotNullPacketTwice() {
 		long sendTime = System.currentTimeMillis();
-		Frame frame1 = new Frame(ProtocolUtils.ramdomByteArray(200));
+		Frame frame1 = new Frame(ProtocolTestUtils.ramdomByteArray(200));
 		frame1.setSendTime(sendTime - 2);
 		frame1.setReliabilityType(ReliabilityType.reliable);
 		
-		Frame frame2 = new Frame(ProtocolUtils.ramdomByteArray(300));
+		Frame frame2 = new Frame(ProtocolTestUtils.ramdomByteArray(300));
 		frame2.setSendTime(sendTime);
 		frame2.setReliabilityType(ReliabilityType.reliable);
 		
-		Frame frame3 = new Frame(ProtocolUtils.ramdomByteArray(MTU - 1 - 3 - frame1.lengthOfBytes() - frame2.lengthOfBytes() - 6 + 1));
+		Frame frame3 = new Frame(ProtocolTestUtils.ramdomByteArray(MTU - 1 - 3 - frame1.lengthOfBytes() - frame2.lengthOfBytes() - 6 + 1));
 		frame3.setSendTime(sendTime - 1);
 		frame3.setReliabilityType(ReliabilityType.reliable);
 
