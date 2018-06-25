@@ -2,34 +2,44 @@ package com.netease.next.jraknet.protocol;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.PriorityBlockingQueue;
 
 import com.netease.next.jraknet.packet.FrameSetPacket;
 
 public class FrameSetPacketPacker {
 
 	private static final int ID_AND_FRAME_SET_INDEX_LEGTH = 4;
-	private PriorityBlockingQueue<Frame> frameQueue;
+	private FrameQueue frameQueue;
 	private Long sendTime;
 	private int mtu;
 	private FrameSetIndexGenerator frameSetIndexGenerator;
+	private Frame overloadedFrame = null;
 
 	public FrameSetPacket next() {
 		if(this.sendTime == null || frameQueue == null) {
 			throw new IllegalStateException();
 		}
-		Frame headFrame;
+		List<Frame> frameList = new LinkedList<>();
 		int packetLength = ID_AND_FRAME_SET_INDEX_LEGTH;
 		
-		List<Frame> frameList = new LinkedList<>();
-		while((headFrame = frameQueue.poll()) != null 
-				&& headFrame.getSendTime() <= sendTime) {
+		if(overloadedFrame != null) {
+			frameList.add(overloadedFrame);
+			packetLength += overloadedFrame.lengthOfBytes();
+			overloadedFrame = null;
+		}
+		
+		Frame headFrame;
+		while((headFrame =  frameQueue.poll()) != null) {
+			
+			if(headFrame.getSendTime() > sendTime) {
+				frameQueue.add(headFrame);
+				break;
+			}
 			
 			packetLength += headFrame.lengthOfBytes();
 			if(packetLength <= mtu) {
 				frameList.add(headFrame);
 			} else {
-				frameQueue.add(headFrame);
+				overloadedFrame = headFrame;
 				
 				FrameSetPacket frameSetPacket = new FrameSetPacket(frameList);
 				frameSetPacket.setFrameSetIndex(frameSetIndexGenerator.generateFrameSetIndex());
@@ -44,7 +54,7 @@ public class FrameSetPacketPacker {
 		return null;
 	}
 	
-	public void setFrameQueue(PriorityBlockingQueue<Frame> frameQueue) {
+	public void setFrameQueue(FrameQueue frameQueue) {
 		this.frameQueue = frameQueue;
 		
 	}

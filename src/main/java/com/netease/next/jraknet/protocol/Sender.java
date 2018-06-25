@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.netease.next.jraknet.PacketOutput;
@@ -20,7 +19,7 @@ public class Sender implements FrameSetIndexGenerator {
 	private AtomicInteger compoundID = new AtomicInteger(0); // 16 bits
 	private Unsigned24BitsCycleIndexGenerator frameSetIndex = new Unsigned24BitsCycleIndexGenerator(0);
 	
-	private PriorityBlockingQueue<Frame> frameQueue = new PriorityBlockingQueue<>();
+	private FrameQueue frameQueue = new FrameQueue();
 	
 	public void send(ToClientPacket toClientPacket) throws IOException {
 		out.write(toClientPacket.encode());
@@ -75,7 +74,7 @@ public class Sender implements FrameSetIndexGenerator {
 		this.maxFrameBodySize = mtu - 60;
 	}
 	
-	PriorityBlockingQueue<Frame> getFrameQueue() {
+	public FrameQueue getFrameQueue() {
 		return frameQueue;
 	}
 

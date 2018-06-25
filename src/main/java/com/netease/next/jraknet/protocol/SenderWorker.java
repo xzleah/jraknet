@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,14 +13,18 @@ import com.netease.next.jraknet.packet.FrameSetPacket;
 public class SenderWorker implements Runnable {
 	
 	private static final long DELAY = 200;
+	private static final int DEFAULT_MAX_RESEND_TIMES = 25;
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private BlockingQueue<Sender> senderQueue;
 	private boolean running = true;
+
+	private int maxResendTimes;
 	
 	public SenderWorker() {
 		senderQueue = new LinkedBlockingQueue<>();
+		maxResendTimes = DEFAULT_MAX_RESEND_TIMES;
 	}
 	
 	@Override
@@ -52,17 +55,25 @@ public class SenderWorker implements Runnable {
 		
 		FrameSetPacket packet = null;
 		while((packet = packer.next()) != null) {
+			updateSendTimes(packet.getFrameList());
 			sender.send(packet);
-			resendReliableFrame(packet.getFrameList(), sender.getFrameQueue(), now + DELAY);
+			resendReliableFrame(packet, sender.getFrameQueue(), now + DELAY);
 		}
 	}
 
 
-	private void resendReliableFrame(List<Frame> frameList, PriorityBlockingQueue<Frame> frameQueue, long resendTime) {
+	private void updateSendTimes(List<Frame> frameList) {
 		for(Frame frame : frameList) {
-			if(frame.isReliable()) {
+			frame.increaseTimesOfSend();
+		}
+	}
+
+	private void resendReliableFrame(FrameSetPacket packet, FrameQueue frameQueue, long resendTime) {
+		List<Frame> frameList = packet.getFrameList();
+		for(Frame frame : frameList) {
+			if(frame.isReliable() && frame.timesOfSend() < maxResendTimes) {
 				frame.setSendTime(resendTime);
-				frameQueue.add(frame);
+				frameQueue.add(packet.getIndex(), frame);
 			}
 		}
 	}
@@ -79,5 +90,13 @@ public class SenderWorker implements Runnable {
 		synchronized (this) {
 			this.notify();
 		}
+	}
+
+	public int getMaxResendTimes() {
+		return maxResendTimes;
+	}
+
+	public void setMaxResendTimes(int maxResendTimes) {
+		this.maxResendTimes = maxResendTimes;
 	}
 }

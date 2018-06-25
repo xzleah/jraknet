@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import java.util.List;
-import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Before;
@@ -42,7 +41,7 @@ public class FrameSetPacketPackerTest {
 	
 	@Test
 	public void testNext_OK_withEmptyFrameQueue() {
-		packer.setFrameQueue(new PriorityBlockingQueue<>());
+		packer.setFrameQueue(new FrameQueue());
 		packer.setSendTime(System.currentTimeMillis());
 		FrameSetPacket packet = packer.next();
 		assertNull(packet);
@@ -50,7 +49,7 @@ public class FrameSetPacketPackerTest {
 	
 	@Test(expected = IllegalStateException.class)
 	public void testNext_failue_withNotSetSendTime() {
-		packer.setFrameQueue(new PriorityBlockingQueue<>());
+		packer.setFrameQueue(new FrameQueue());
 		packer.next();
 	}
 	
@@ -60,7 +59,7 @@ public class FrameSetPacketPackerTest {
 		frame.setSendTime(System.currentTimeMillis());
 		frame.setReliabilityType(ReliabilityType.reliable);
 		
-		PriorityBlockingQueue<Frame> frameQueue = new PriorityBlockingQueue<>();
+		FrameQueue frameQueue = new FrameQueue();
 		frameQueue.add(frame);
 		
 		packer.setFrameQueue(frameQueue);
@@ -86,7 +85,7 @@ public class FrameSetPacketPackerTest {
 		Frame frame = new Frame(Hex.decodeHex("05020000000000000000"));
 		frame.setSendTime(sendTime + 1);
 		
-		PriorityBlockingQueue<Frame> frameQueue = new PriorityBlockingQueue<>();
+		FrameQueue frameQueue = new FrameQueue();
 		frameQueue.add(frame);
 		
 		packer.setFrameQueue(frameQueue);
@@ -109,7 +108,7 @@ public class FrameSetPacketPackerTest {
 		frame2.setReliabilityType(ReliabilityType.reliable);
 		
 		// order is frame1,frame2
-		PriorityBlockingQueue<Frame> frameQueue = new PriorityBlockingQueue<>(); 
+		FrameQueue frameQueue = new FrameQueue(); 
 		frameQueue.add(frame1);
 		frameQueue.add(frame2);
 		
@@ -141,7 +140,7 @@ public class FrameSetPacketPackerTest {
 		frame3.setReliabilityType(ReliabilityType.reliable);
 
 		// order is frame1,frame3,frame2
-		PriorityBlockingQueue<Frame> frameQueue = new PriorityBlockingQueue<>(); 
+		FrameQueue frameQueue = new FrameQueue(); 
 		frameQueue.add(frame1);
 		frameQueue.add(frame2);
 		frameQueue.add(frame3);
@@ -163,4 +162,30 @@ public class FrameSetPacketPackerTest {
 		assertNull(packer.next());
 	}
 	
+	@Test
+	public void testNext_OK_frameRemain() {
+		long sendTime = System.currentTimeMillis();
+		Frame frame1 = new Frame(ProtocolTestUtils.ramdomByteArray(200));
+		frame1.setSendTime(sendTime);
+		frame1.setReliabilityType(ReliabilityType.reliable);
+		
+		Frame frame2 = new Frame(ProtocolTestUtils.ramdomByteArray(300));
+		frame2.setSendTime(sendTime + 1);
+		frame2.setReliabilityType(ReliabilityType.reliable);
+		
+		FrameQueue frameQueue = new FrameQueue(); 
+		frameQueue.add(frame1);
+		frameQueue.add(frame2);
+		
+		packer.setFrameQueue(frameQueue);
+		packer.setSendTime(sendTime);
+		
+		FrameSetPacket packet = packer.next();
+		assertNotNull(packet);
+		assertThat(packet.getFrameList().size(), equalTo(1));
+		assertThat(packet.getFrameList().get(0), equalTo(frame1));
+		
+		assertNull(packer.next());
+		assertThat(frameQueue.size(), equalTo(1));
+	}
 }

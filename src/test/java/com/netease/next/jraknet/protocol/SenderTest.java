@@ -6,8 +6,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.util.concurrent.PriorityBlockingQueue;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,9 +24,9 @@ public class SenderTest {
 		byte[] message = ProtocolTestUtils.ramdomByteArray(500);
 		
 		sender.packAndSend(message);
-		PriorityBlockingQueue<Frame> frameQueue = sender.getFrameQueue();
+		FrameQueue frameQueue = sender.getFrameQueue();
 		assertThat(frameQueue.size(), is(1));
-		Frame headFrame = frameQueue.take();
+		Frame headFrame = frameQueue.poll();
 		assertFalse(headFrame.isFragmented());
 	}
 	
@@ -40,7 +38,7 @@ public class SenderTest {
 		byte[] message = ProtocolTestUtils.ramdomByteArray(1555);
 		
 		sender.packAndSend(message);
-		PriorityBlockingQueue<Frame> frameQueue = sender.getFrameQueue();
+		FrameQueue frameQueue = sender.getFrameQueue();
 		assertThat(frameQueue.size(), is(2));
 		
 		Frame firstFrame = frameQueue.poll();

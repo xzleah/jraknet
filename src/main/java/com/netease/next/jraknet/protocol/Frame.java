@@ -2,7 +2,7 @@ package com.netease.next.jraknet.protocol;
 
 import java.util.Arrays;
 
-public class Frame implements Comparable<Frame>{
+public class Frame implements Comparable<Frame>, Cloneable {
 
 	/**
 	 * 1 byte for flags. 2 bytes for length.
@@ -24,10 +24,13 @@ public class Frame implements Comparable<Frame>{
 
 	private long sendTime;
 
+	private int sendTimes;
+
 	public Frame(byte[] data) {
 		this.data = data;
+		sendTimes = 0;
 	}
-
+	
 	public int getBodyLengthInBits() {
 		return data.length;
 	}
@@ -169,6 +172,7 @@ public class Frame implements Comparable<Frame>{
 		result = prime * result + ((reliabilityType == null) ? 0 : reliabilityType.hashCode());
 		result = prime * result + reliableFrameIndex;
 		result = prime * result + (int) (sendTime ^ (sendTime >>> 32));
+		result = prime * result + sendTimes;
 		result = prime * result + sequencedFrameIndex;
 		return result;
 	}
@@ -202,6 +206,8 @@ public class Frame implements Comparable<Frame>{
 			return false;
 		if (sendTime != other.sendTime)
 			return false;
+		if (sendTimes != other.sendTimes)
+			return false;
 		if (sequencedFrameIndex != other.sequencedFrameIndex)
 			return false;
 		return true;
@@ -209,6 +215,32 @@ public class Frame implements Comparable<Frame>{
 
 	public boolean isReliable() {
 		return reliabilityType.isReliable();
+	}
+
+	public int timesOfSend() {
+		return sendTimes;
+	}
+
+	public void increaseTimesOfSend() {
+		sendTimes++;
+	}
+
+	@Override
+	public Frame clone() throws CloneNotSupportedException {
+		Frame clone = new Frame(this.data);
+		clone.data = this.data;
+		clone.reliabilityType = this.reliabilityType;
+		clone.fragmented = this.fragmented;
+		clone.reliableFrameIndex = this.reliableFrameIndex;
+		clone.sequencedFrameIndex = this.sequencedFrameIndex;
+		clone.orderedFrameIndex = this.orderedFrameIndex;
+		clone.orderChannel = this.orderChannel;
+		clone.compoundSize = this.compoundSize;
+		clone.compoundID = this.compoundID;
+		clone.fragmentIndex = this.fragmentIndex;
+		clone.sendTime = this.sendTime;
+		clone.sendTimes = this.sendTimes;
+		return clone;
 	}
 
 }

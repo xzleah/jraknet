@@ -1,7 +1,19 @@
 package com.netease.next.jraknet;
 
-public interface Client {
+import java.io.IOException;
 
-	void send(byte[] packetData);
+import com.netease.next.jraknet.protocol.Sender;
+
+public class Client {
+	
+	private Sender sender;
+
+	public void send(byte[] packetData) throws RaknetException {
+		try {
+			sender.packAndSend(packetData);
+		} catch (IOException e) {
+			throw new RaknetException(e.getMessage(), e);
+		}
+	}
 	
 }
