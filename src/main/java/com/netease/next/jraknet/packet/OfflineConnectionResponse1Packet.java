@@ -2,7 +2,7 @@ package com.netease.next.jraknet.packet;
 
 import com.netease.next.jraknet.binary.BinaryOutputStream;
 
-public class OfflineConnectionResponse1 implements ToClientPacket {
+public class OfflineConnectionResponse1Packet implements ToClientPacket {
 	
 	private static final byte PACK_ID = PacketIdDefinition.OFFLINE_CONNECTION_RESPONSE_1;
 

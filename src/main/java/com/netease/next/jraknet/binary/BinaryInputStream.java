@@ -36,4 +36,9 @@ public class BinaryInputStream {
 		offset ++;
 		return value;
 	}
+
+	public long getLong() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

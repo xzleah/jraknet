@@ -23,8 +23,8 @@ public class BinaryOutputStream {
 		return byteArray;
 	}
 
-	public void putByte(byte packId) {
-		buf.add(packId);
+	public void putByte(byte b) {
+		buf.add(b);
 	}
 
 	public void putMagic() {

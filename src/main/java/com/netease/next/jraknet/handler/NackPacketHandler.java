@@ -2,24 +2,25 @@ package com.netease.next.jraknet.handler;
 
 import com.netease.next.jraknet.packet.NackPacket;
 import com.netease.next.jraknet.protocol.FrameQueue;
-import com.netease.next.jraknet.protocol.Sender;
 
 public class NackPacketHandler implements PacketHandler<NackPacket> {
 
-	private Sender sender;
+	private FrameQueue frameQueue;
 
 	public NackPacketHandler() {
 		this(null);
 	}
 
-	public NackPacketHandler(Sender sender) {
-		this.sender = sender;
+	public NackPacketHandler(FrameQueue frameQueue) {
+		this.frameQueue = frameQueue;
 	}
 
 	@Override
 	public void handle(NackPacket nackPacket) {
+		if(frameQueue == null) {
+			throw new IllegalStateException("can not find frame queue.");
+		}
 		long sendTime = System.currentTimeMillis();
-		FrameQueue frameQueue = sender.getFrameQueue();
 		if(nackPacket.isRange()) {
 			int startIndex = nackPacket.getStartIndex();
 			int endIndex = nackPacket.getEndIndex();
@@ -34,8 +35,8 @@ public class NackPacketHandler implements PacketHandler<NackPacket> {
 		}
 	}
 
-	public void setSender(Sender sender) {
-		this.sender = sender;
+	public void setFrameQueue(FrameQueue frameQueue) {
+		this.frameQueue = frameQueue;
 	}
 
 }

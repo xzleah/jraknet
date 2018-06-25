@@ -2,7 +2,7 @@ package com.netease.next.jraknet.packet;
 
 import com.netease.next.jraknet.binary.BinaryInputStream;
 
-public class OfflineCoinnectionRequest1 implements ToServerPacket {
+public class OfflineConnectionRequest1Packet implements ToServerPacket {
 
 	private short protocolVersion;
 	

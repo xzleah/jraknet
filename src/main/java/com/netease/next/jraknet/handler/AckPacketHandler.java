@@ -2,23 +2,24 @@ package com.netease.next.jraknet.handler;
 
 import com.netease.next.jraknet.packet.ACKPacket;
 import com.netease.next.jraknet.protocol.FrameQueue;
-import com.netease.next.jraknet.protocol.Sender;
 
 public class AckPacketHandler implements PacketHandler<ACKPacket> {
 
-	private Sender sender;
+	private FrameQueue frameQueue;
 	
 	public AckPacketHandler() {
 		this(null);
 	}
 	
-	public AckPacketHandler(Sender sender) {
-		this.sender = sender;
+	public AckPacketHandler(FrameQueue frameQueue) {
+		this.frameQueue = frameQueue;
 	}
 	
 	@Override
 	public void handle(ACKPacket ackPacket) {
-		FrameQueue frameQueue = sender.getFrameQueue();
+		if(frameQueue == null) {
+			throw new IllegalStateException("can not find frame queue.");
+		}
 		if(ackPacket.isRange()) {
 			int startIndex = ackPacket.getStartIndex();
 			int endIndex = ackPacket.getEndIndex();
@@ -33,8 +34,8 @@ public class AckPacketHandler implements PacketHandler<ACKPacket> {
 		}
 	}
 
-	public void setSender(Sender sender) {
-		this.sender = sender;
+	public void setFrameQueue(FrameQueue frameQueue) {
+		this.frameQueue = frameQueue;
 	}
 
 }
