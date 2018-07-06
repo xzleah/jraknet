@@ -1,12 +1,15 @@
 package com.netease.next.jraknet.packet;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.netease.next.jraknet.RaknetException;
+import com.netease.next.jraknet.binary.BinaryInputStream;
 import com.netease.next.jraknet.binary.BinaryOutputStream;
 import com.netease.next.jraknet.protocol.Frame;
 import com.netease.next.jraknet.protocol.ReliabilityType;
 
-public class FrameSetPacket implements ToClientPacket {
+public class FrameSetPacket implements ToClientPacket, ToServerPacket {
 
 	private List<Frame> frameList;
 	private byte packetId;
@@ -54,6 +57,7 @@ public class FrameSetPacket implements ToClientPacket {
 				outputStream.putUint24Le(frame.getSequencedFrameIndex());
 				outputStream.putUint24Le(frame.getOrderedFrameIndex());
 				outputStream.putByte((byte)frame.getOrderChannel());
+				break;
 			default:
 				throw new IllegalStateException("unknow reliability type of " + frame.getReliabilityType().name());
 			}
@@ -90,6 +94,61 @@ public class FrameSetPacket implements ToClientPacket {
 
 	public int getIndex() {
 		return frameSetIndex;
+	}
+
+	@Override
+	public void decodeForm(byte[] packetData) {
+		BinaryInputStream in = new BinaryInputStream(packetData);
+		packetId = in.getByte();
+		frameSetIndex = in.getUint24Le();
+		frameList = new ArrayList<>();
+		while(!in.isEnd()) {
+			Frame frame = new Frame();
+			byte flags = in.getByte();
+			ReliabilityType reliabilityType = getReliabilityType(flags);
+			if(reliabilityType == null) {
+				throw new RaknetException("Invalid frame set packet.");
+			}
+			frame.setReliabilityType(reliabilityType); ;
+			frame.setFragmented(isFragmented(flags));
+			short length = in.getShort();
+			switch (reliabilityType) {
+			case unreliable:
+				break;
+			case unreliableSequenced:
+				frame.setSequencedFrameIndex(in.getUint24Le());
+				frame.setOrderedFrameIndex(in.getUint24Le());
+				frame.setOrderChannel(in.getByte());
+				break;
+			case reliable:
+				frame.setReliableFrameIndex(in.getUint24Le());
+				break;
+			case reliableOrdered:
+				frame.setReliableFrameIndex(in.getUint24Le());
+				frame.setOrderedFrameIndex(in.getUint24Le());
+				frame.setOrderChannel(in.getByte());
+				break;
+			case reliableSequenced:
+				frame.setReliableFrameIndex(in.getUint24Le());
+				frame.setSequencedFrameIndex(in.getUint24Le());
+				frame.setOrderedFrameIndex(in.getUint24Le());
+				frame.setOrderChannel(in.getByte());
+				break;
+			default:
+				throw new IllegalStateException("unknow reliability type of " + frame.getReliabilityType().name());
+			}
+			length = (short) Math.min(length, in.remainingLength());
+			frame.setData(in.getByteArray(length));
+		}
+	}
+
+	private boolean isFragmented(byte flags) {
+		return ((flags & 0x10) == 1) ? true : false;
+	}
+
+	private ReliabilityType getReliabilityType(byte flags) {
+		int ordinal = flags >>> 5;
+		return ReliabilityType.valueOfOrdinal(ordinal);
 	}
 
 }

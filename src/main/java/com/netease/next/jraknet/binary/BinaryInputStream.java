@@ -2,6 +2,8 @@ package com.netease.next.jraknet.binary;
 
 import static com.netease.next.jraknet.binary.Magic.VALUE;
 
+import java.util.Arrays;
+
 public class BinaryInputStream {
 	
 	private byte[] buf;
@@ -38,7 +40,35 @@ public class BinaryInputStream {
 	}
 
 	public long getLong() {
-		// TODO Auto-generated method stub
-		return 0;
+		byte[] bytes = getByteArray(8);
+		return (((long) bytes[0] << 56) +
+				((long) (bytes[1] & 0xFF) << 48) +
+				((long) (bytes[2] & 0xFF) << 40) +
+				((long) (bytes[3] & 0xFF) << 32) +
+				((long) (bytes[4] & 0xFF) << 24) +
+				((bytes[5] & 0xFF) << 16) +
+				((bytes[6] & 0xFF) << 8) +
+				((bytes[7] & 0xFF)));
+	}
+
+	public int getUint24Le() {
+		byte[] bytes = getByteArray(3);
+		return (0xff << 24) +
+				((bytes[2] & 0xff) << 16) +
+				((bytes[1] & 0xff) << 8) +
+				(bytes[0] & 0xff);
+	}
+
+	public boolean isEnd() {
+		return offset >= buf.length;
+	}
+
+	public int remainingLength() {
+		int remainingLength = buf.length - offset;
+		return remainingLength < 0 ? 0 : remainingLength;
+	}
+
+	public byte[] getByteArray(int length) {
+		return Arrays.copyOfRange(buf, offset, length);
 	}
 }

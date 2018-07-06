@@ -29,4 +29,16 @@ public class OfflineConnectionRequest2Handler implements PacketHandler<OfflineCo
 		}
 	}
 
+	public void setSender(Sender sender) {
+		this.sender = sender;
+	}
+
+	public void setServerGUID(long serverGUID) {
+		this.serverGUID = serverGUID;
+	}
+
+	public void setClientAddress(InetAddress clientAddress) {
+		this.clientAddress = clientAddress;
+	}
+
 }

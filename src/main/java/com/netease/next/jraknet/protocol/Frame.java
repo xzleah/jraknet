@@ -25,6 +25,8 @@ public class Frame implements Comparable<Frame>, Cloneable {
 	private long sendTime;
 
 	private int sendTimes;
+	
+	public Frame() {};
 
 	public Frame(byte[] data) {
 		this.data = data;
@@ -241,6 +243,10 @@ public class Frame implements Comparable<Frame>, Cloneable {
 		clone.sendTime = this.sendTime;
 		clone.sendTimes = this.sendTimes;
 		return clone;
+	}
+
+	public void setData(byte[] data) {
+		this.data = data;
 	}
 
 }

@@ -18,4 +18,13 @@ public enum ReliabilityType {
 	};
 
 	abstract public boolean isReliable();
+
+	public static ReliabilityType valueOfOrdinal(int ordinal) {
+		for(ReliabilityType t : ReliabilityType.values()) {
+			if(t.ordinal() == ordinal) {
+				return t;
+			}
+		}
+		return null;
+	}
 }
